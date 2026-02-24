@@ -36,3 +36,13 @@ code/
    ```bash
    python code/plot_fires.py
    ```
+
+## Large Raw Dataset
+`building_violations_raw.csv` is >100MB and is not stored in this GitHub repository.
+
+Download (Google Drive):
+- https://drive.google.com/file/d/1pgeuZq6TKBKSqyTAro4o173iqnzVodFW/view?usp=sharing
+'Link access: anyone with the link can view/download.'
+
+After downloading, save it to this exact path (do not rename):
+- `data/raw-data/building_violations_raw.csv`
