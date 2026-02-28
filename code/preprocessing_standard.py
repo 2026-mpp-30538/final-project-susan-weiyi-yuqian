@@ -1,58 +1,39 @@
 import pandas as pd
 from pathlib import Path
 
+### Path
 script_dir = Path(__file__).parent
 
-# -------------------------
-# Paths
-# -------------------------
 raw_dir = script_dir / "../data/raw-data"
 out_dir = script_dir / "../data/derived-data"
 out_dir.mkdir(parents=True, exist_ok=True)
 
-raw_rent_burden = raw_dir / "rent_burden_B25070.csv"
-raw_income = raw_dir / "median_household_income_B19013.csv"
+### Load Data
+rent_burden_path = raw_dir / "rent_burden_B25070.csv"
+median_income_path = raw_dir / "median_household_income_B19013.csv"
 
-out_rent_burden = out_dir / "rent_burden_clean.csv"
-out_income = out_dir / "income_clean.csv"
-out_econ = out_dir / "economic_pressure.csv"
+### Standard Functions
+# Split lebel with data
+def split_label_and_data(df: pd.DataFrame):
+    labels = df.iloc[0].copy()
+    data = df.iloc[1:].copy().reset_index(drop=True)
+    return labels, data
 
-# --------------------------------------------------
-# 1️⃣ 去掉 ACS 第一行（Geography 行）
-# --------------------------------------------------
-def drop_geography_row(df: pd.DataFrame) -> pd.DataFrame:
-    """
-    Drop the first ACS label row where GEO_ID == 'Geography'.
-    """
-    if "GEO_ID" in df.columns:
-        df = df[df["GEO_ID"] != "Geography"].copy()
-    return df
-
-
-# --------------------------------------------------
-# 2️⃣ 清理 GEO_ID，生成标准 GEOID（tract）
-# --------------------------------------------------
-def clean_geoid(df: pd.DataFrame) -> pd.DataFrame:
-    """
-    Create a clean GEOID column by removing Census prefix
-    (e.g., '1400000US17031010100' -> '17031010100')
-    """
+# Clean GEOID
+def add_clean_geoid(df: pd.DataFrame, geo_col: str = "GEO_ID") -> pd.DataFrame:
     df["GEOID"] = (
-        df["GEO_ID"]
+        df[geo_col]
         .astype(str)
         .str.replace("1400000US", "", regex=False)
     )
     return df
 
+# Standardize a series to z-scores
+def zscore(s: pd.Series) -> pd.Series:
+    return (s - s.mean()) / s.std(ddof=0)
 
-# --------------------------------------------------
-# 3️⃣ 将指定列转换为数值类型
-# --------------------------------------------------
-def convert_to_numeric(df: pd.DataFrame, cols: list[str]) -> pd.DataFrame:
-    """
-    Convert selected columns to numeric (coerce errors to NaN).
-    """
-    for col in cols:
-        if col in df.columns:
-            df[col] = pd.to_numeric(df[col], errors="coerce")
-    return df
+### Economic Pressure1: Rent Burden
+rent_burden = pd.read_csv(rent_burden_path)
+labels, rent_burden = split_label_and_data(rent_burden)
+print(rent_burden.columns)
+print("B25070_001E label =", labels["B25070_001E"])
