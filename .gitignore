@@ -2,3 +2,5 @@
 **/.DS_Store
 
 data/raw-data/building_violations_raw.csv
+.DS_Store
+.Rhistory
